@@ -1077,6 +1077,9 @@ async function processAzureAccountField(context: AzureAccountFieldContext): Prom
 	}
 	const locationDropdown = context.fieldInfo.locations && await processAzureLocationsField(context);
 	accountDropdown.onValueChanged(async selectedItem => {
+		if (selectedItem.selected === accountDropdown.value) {
+			return;
+		}
 		const selectedAccount = accountValueToAccountMap.get(selectedItem.selected)!;
 		await handleSelectedAccountChanged(context, selectedAccount, subscriptionDropdown, subscriptionValueToSubscriptionMap, resourceGroupDropdown, locationDropdown);
 	});
@@ -1110,6 +1113,19 @@ async function processAzureAccountField(context: AzureAccountFieldContext): Prom
 	// populate the values in a different batch as the initialization to avoid the issue that the account list is empty even though the values are correctly.
 	setTimeout(async () => {
 		await populateAzureAccounts();
+		const initialSubscription = context.initialVariableValues?.[context.fieldInfo.subscriptionVariableName || ''].toString();
+		if (initialSubscription) {
+			subscriptionValueToSubscriptionMap.forEach((value, key) => {
+				if (value.id === initialSubscription) {
+					subscriptionDropdown.value = key;
+				}
+			});
+		}
+		const initialResourceGroup = context.initialVariableValues?.[context.fieldInfo.resourceGroupVariableName || ''].toString();
+		if (initialResourceGroup) {
+			resourceGroupDropdown.value = initialResourceGroup;
+		}
+
 	}, 0);
 }
 
@@ -1195,8 +1211,10 @@ function createAzureSubscriptionDropdown(
 		width: context.fieldInfo.labelWidth,
 		cssStyles: context.fieldInfo.labelCSSStyles
 	});
+	const defaultValue = context.initialVariableValues?.[context.fieldInfo.subscriptionVariableName || ''].toString() ?? (context.fieldInfo.required ? undefined : '');
 	const subscriptionDropdown = createDropdownInputInfo(context.view, {
-		defaultValue: (context.fieldInfo.required) ? undefined : '',
+		defaultValue: defaultValue,
+		values: defaultValue ? [defaultValue] : [],
 		width: context.fieldInfo.inputWidth,
 		editable: false,
 		required: context.fieldInfo.required,
@@ -1349,6 +1367,9 @@ function createAzureResourceGroupsDropdown(
 	context.onNewInputComponentCreated(context.fieldInfo.resourceGroupVariableName || context.fieldInfo.label, resourceGroupDropdown);
 	addLabelInputPairToContainer(context.view, context.components, label, resourceGroupDropdown.component, context.fieldInfo);
 	subscriptionDropdown.onValueChanged(async selectedItem => {
+		if (selectedItem.selected === subscriptionDropdown.value) {
+			return;
+		}
 		const selectedAccount = !accountDropdown || !accountDropdown.value ? undefined : accountValueToAccountMap.get(accountDropdown.value.toString());
 		const selectedSubscription = subscriptionValueToSubscriptionMap.get(selectedItem.selected);
 		await handleSelectedSubscriptionChanged(context, selectedAccount, selectedSubscription, resourceGroupDropdown.component);
@@ -1399,6 +1420,14 @@ async function handleSelectedSubscriptionChanged(context: AzureAccountFieldConte
 		resourceGroupDropdown.values = (response.resourceGroups.length !== 0)
 			? response.resourceGroups.map(resourceGroup => resourceGroup.name).sort((a: string, b: string) => a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase()))
 			: [''];
+		if (context.initialVariableValues) {
+			if (context.fieldInfo.resourceGroupVariableName) {
+				const initialResourceGroup = context.initialVariableValues[context.fieldInfo.resourceGroupVariableName].toString();
+				if (resourceGroupDropdown.values.includes(initialResourceGroup)) {
+					resourceGroupDropdown.value = initialResourceGroup;
+				}
+			}
+		}
 	} catch (error) {
 		await vscode.window.showErrorMessage(await getAzureAccessError({ selectedAccount, defaultErrorMessage: localize('azure.accounts.unexpectedResourceGroupsError', "Unexpected error fetching resource groups for subscription {0}: {1}", getSubscriptionDisplayString(selectedSubscription), getErrorMessage(error)), error }));
 	}
