@@ -57,11 +57,12 @@ steps:
     cacheHitVar: NODE_MODULES_RESTORED
   displayName: Restore Cache - Node Modules
 
-  - script: |
-      set -e
-      tar -xzf .build/node_modules_cache/cache.tgz
-    condition: and(succeeded(), eq(variables['NODE_MODULES_RESTORED'], 'true'))
-    displayName: Extract node_modules archive
+- script: |
+    set -e
+    tar -xzf .build/node_modules_cache/cache.tgz
+  condition: and(succeeded(), eq(variables['NODE_MODULES_RESTORED'], 'true'))
+  displayName: Extract node_modules archive
+
 - script: |
     set -e
     CHILD_CONCURRENCY=1 yarn --frozen-lockfile
