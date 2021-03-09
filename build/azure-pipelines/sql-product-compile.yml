@@ -74,8 +74,8 @@ steps:
 - script: |
     set -e
     node build/azure-pipelines/sql-listNodeModules.js .build/node_modules_list.txt
-    mkdir -p .build/extensions
-    tar -czvf .build/extensions/cache.tgz --files-from .build/node_modules_list.txt
+    mkdir -p .build/darwin
+    tar -czvf .build/darwin/cache.tgz --files-from .build/node_modules_list.txt
   displayName: Create node_modules archive
 
 - script: |
