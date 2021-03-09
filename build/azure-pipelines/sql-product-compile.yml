@@ -59,7 +59,7 @@ steps:
 
 - script: |
     set -e
-    tar -xzf .build/node_modules_cache/cache.tgz
+    tar -xzvf .build/node_modules_cache/cache.tgz
   condition: and(succeeded(), eq(variables['NODE_MODULES_RESTORED'], 'true'))
   displayName: Extract node_modules archive
 
