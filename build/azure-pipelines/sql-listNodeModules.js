@@ -27,7 +27,7 @@ function findNodeModulesFiles(location, inNodeModules, result) {
         }
         if (stat.isDirectory()) {
             if (inNodeModules && entry === 'node_modules') {
-                continue;
+                continue; // ignore the node_modules directories inside a node_modules directory
             }
             findNodeModulesFiles(entryPath, inNodeModules || (entry === 'node_modules'), result);
         }
