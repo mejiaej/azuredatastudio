@@ -10,7 +10,7 @@ if (process.argv.length !== 3) {
     console.error('Usage: node listNodeModules.js OUTPUT_FILE');
     process.exit(-1);
 }
-const ROOT = path.join(__dirname, '../../../');
+const ROOT = path.join(__dirname, '../../');
 function findNodeModulesFiles(location, inNodeModules, result) {
     const entries = fs.readdirSync(path.join(ROOT, location));
     for (const entry of entries) {
