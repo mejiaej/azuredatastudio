@@ -71,7 +71,7 @@ steps:
     vstsFeed: 'BuildCache'
   condition: and(succeeded(), ne(variables['CacheRestored'], 'true'))
 
-  - script: |
+- script: |
       set -e
       node build/azure-pipelines/sql-listNodeModules.js .build/node_modules_list.txt
       mkdir -p .build/node_modules_cache
