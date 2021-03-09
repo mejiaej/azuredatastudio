@@ -71,6 +71,13 @@ steps:
     vstsFeed: 'BuildCache'
   condition: and(succeeded(), ne(variables['CacheRestored'], 'true'))
 
+  - script: |
+      set -e
+      node build/azure-pipelines/sql-listNodeModules.js .build/node_modules_list.txt
+      mkdir -p .build/node_modules_cache
+      tar -czf .build/node_modules_cache/cache.tgz --files-from .build/node_modules_list.txt
+    displayName: Create node_modules archive
+
 - script: |
     set -e
     yarn postinstall
