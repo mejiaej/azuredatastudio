@@ -60,6 +60,9 @@ steps:
 - script: |
     set -e
     tar -xzvf .build/node_modules_cache/cache.tgz
+    ls node_modules/
+    ls node_modules/@typescript-eslint/experimental-utils
+
   condition: and(succeeded(), eq(variables['NODE_MODULES_RESTORED'], 'true'))
   displayName: Extract node_modules archive
 
