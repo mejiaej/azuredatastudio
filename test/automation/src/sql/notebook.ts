@@ -33,6 +33,8 @@ export class Notebook {
 		await this.code.waitForElement('.notebookEditor');
 	}
 
+	// Notebook Toolbar Actions
+
 	async addCell(cellType: 'markdown' | 'code'): Promise<void> {
 		if (cellType === 'markdown') {
 			await this.code.dispatchKeybinding(winOrCtrl + '+shift+t');
@@ -92,6 +94,39 @@ export class Notebook {
 		const selector = '.notebook-cell.active .monaco-editor .view-lines';
 		return this.code.waitForTextContent(selector, undefined, c => accept(c.replace(/\u00a0/g, ' ')));
 	}
+
+	// Cell Actions
+
+	async addCellFromPlaceholder(cellType: 'markdown' | 'code'): Promise<void> {
+		const placeholderTextSelector = 'div[class="placeholder-cell-component text"]';
+		if (cellType === 'markdown') {
+			await this.code.waitAndClick(`${placeholderTextSelector} p a[textContent="+ Text"]`);
+		} else {
+			await this.code.waitAndClick(`${placeholderTextSelector} p a[textContent="+ Code"]`);
+		}
+
+		await this.code.waitForElement('.notebook-cell.active');
+	}
+
+	async waitForPlaceholderGone(): Promise<void> {
+		const placeholderSelector = 'div[class="placeholder-cell-component"]';
+		this.code.waitForElementGone(placeholderSelector);
+	}
+
+	private static readonly doubleClickToEditSelector = 'text-cell-component notebook-text show-preview div.notebook-preview';
+	async waitForDoubleClickToEdit(): Promise<void> {
+		this.code.waitForElement(Notebook.doubleClickToEditSelector);
+	}
+
+	async doubleClickTextCell(): Promise<void> {
+		this.code.waitAndDoubleClick(Notebook.doubleClickToEditSelector);
+	}
+
+	async waitForDoubleClickToEditGone(): Promise<void> {
+		this.code.waitForElementGone(Notebook.doubleClickToEditSelector);
+	}
+
+	// Cell Output Actions
 
 	async waitForActiveCellResults(): Promise<void> {
 		const outputComponent = '.notebook-cell.active .notebook-output';
